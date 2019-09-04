@@ -54,23 +54,28 @@ func escreve_json(json string) {
 	}
 }
 
-func decifrar_json(texto string, numero int32){
+func encode_json(texto string, numero int32){
 
 	saida := bytes.Buffer{}
 	texto = strings.ToLower(texto)
 
 	for i := range texto{
-		if(texto[i] > 97 || texto[i] < 122){
+		if(texto[i] > 97 && texto[i] < 122){
 			novo := int32(texto[i]) + numero
 			if(novo > 122){
 				aux := novo - 122
-				novo = 97 + aux
+				print(aux)
+				novo = 97 + aux - 1
+				print(string(novo))
 			}
 			final := string(novo)
 			saida.WriteString(final)
+		}else{
+			novo := int32(texto[i])
+			saida.WriteString(string(novo))
 		}
 	}
-	print(saida)
+	print(saida.String())
 }
 
 func main() {
@@ -78,6 +83,6 @@ func main() {
 	//api := "https://api.codenation.dev/v1/challenge/dev-ps/generate-data?token=2ba5541ee2a9cac769de829db6ca75e9c1facf08"
 	//json := jaison(api)
 	//fmt.Print(json)
-	decifrar_json("AAAAAAaasoda asoiduasiod asioduaois", 2)
-
+	
+	encode_json("az &**bc", 10)
 }
