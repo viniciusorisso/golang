@@ -118,9 +118,10 @@ func resume_sha1(texto string) string{
 
 func main() {
 
-	api := "https://api.codenation.dev/v1/challenge/dev-ps/generate-data?token=2ba5541ee2a9cac769de829db6ca75e9c1facf08"
+	api := "https://api.codenation.dev/v1/challenge/dev-ps/generate-data?token='COLOCAR O TOKEN AQUI'"
 	final := teste(api)
 	final.Decifrado = decode_json(final.Cifrado, final.Numero_casas)
 	final.Resumo_criptografico = resume_sha1(final.Decifrado)
 	write_json(final)
+
 }
