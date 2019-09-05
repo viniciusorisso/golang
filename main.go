@@ -42,18 +42,18 @@ func get_json(url string) Cripto{
 		log.Fatalln(resp.StatusCode)	
 	}
 
-	response, err2 := ioutil.ReadAll(resp.Body)
+	response, err := ioutil.ReadAll(resp.Body)
 
-	if err2 != nil{
-		log.Fatalln(err2)
+	if err != nil{
+		log.Fatalln(err)
 	}
 	
 	var dadosJson Cripto
 
-	err3 := json.Unmarshal(response, &dadosJson)
+	err = json.Unmarshal(response, &dadosJson)
 
-	if err3 != nil{
-		log.Fatalln(err3)
+	if err != nil{
+		log.Fatalln(err)
 	}
 
 	return dadosJson
@@ -120,32 +120,8 @@ func resume_sha1(texto string) string{
 	return resume
 }
 
-func post_json(url string, final Cripto){
-
-	requestBody, err := json.Marshal(final)
-
-	if err != nil{
-		log.Fatalln(err)
-	}
-
-	resp, err1 := http.Post(url,"answer/json", bytes.NewBuffer(requestBody))
-	
-	if err1 != nil{	
-		log.Fatalln(err1)
-	}
-	
-	defer resp.Body.Close()
-
-	body, err2 := ioutil.ReadAll(resp.Body)
-
-	if err2 != nil{	
-		log.Fatalln(err2)
-	}
-
-	print(string(body))
-}
 // Creates a new file upload http request with optional extra params
-func newfileUploadRequest(uri string, paramName, path string) (*http.Request, error) {
+func post_json(uri string, paramName, path string) (*http.Request, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -168,64 +144,29 @@ func newfileUploadRequest(uri string, paramName, path string) (*http.Request, er
 	return req, err
 }
 
-/*
-func teste(url string){
-	bodyBuf := &bytes.Buffer{}
-	bodyWriter := multipart.NewWriter(bodyBuf)
-
-	fileWriter, err := bodyWriter.CreateFormFile("file", "answer.json")
-	if err != nil{
-		log.Fatalln(err)
-	}
-
-	fh, err1 := os.Open("answer.json")
-	if err1 != nil{
-		log.Fatalln(err1)
-	}
-
-	 //iocopy
-	 _, err = io.Copy(fileWriter, fh)
-	 if err != nil {
-		 panic(err)
-	 }
- 
-	 bodyWriter.FormDataContentType()
-	 bodyWriter.Close()
- 
-	 return err
-}*/
-
 func main() {
 
-	api_get := "https://api.codenation.dev/v1/challenge/dev-ps/generate-data?token=2ba5541ee2a9cac769de829db6ca75e9c1facf08"
-	api_post := "https://api.codenation.dev/v1/challenge/dev-ps/submit-solution?token=2ba5541ee2a9cac769de829db6ca75e9c1facf08"
+	api_get := "https://api.codenation.dev/v1/challenge/dev-ps/generate-data?token='SEU TOKEN AQUI'"
+	api_post := "https://api.codenation.dev/v1/challenge/dev-ps/submit-solution?token='SEU TOKEN AQUI'"
 	final := get_json(api_get)
 	final.Decifrado = decode_json(final.Cifrado, final.Numero_casas)
 	final.Resumo_criptografico = resume_sha1(final.Decifrado)
 	write_json(final)
-	//post_json(api_post, final)
 
-	path, _ := os.Getwd()
-	path += "/answer.json"
-
-	request, err := newfileUploadRequest(api_post, "multipart/form-data", "answer.json")
+	request, err := post_json(api_post, "answer", "answer.json")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 	client := &http.Client{}
 	resp, err := client.Do(request)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	} else {
 		body := &bytes.Buffer{}
 		_, err := body.ReadFrom(resp.Body)
     if err != nil {
-			log.Fatal(err)
+			log.Fatalln(err)
 		}
     resp.Body.Close()
-		fmt.Println(resp.StatusCode)
-		fmt.Println(resp.Header)
-		fmt.Println(body)
 	}
-	
 }
