@@ -8,10 +8,21 @@ import (
 	"log"
 	"strings"
 	"bytes"
+	"encoding/json"
+	"crypto/sha1"
+	"encoding/hex"
 )
 var print = fmt.Println
 
-func jaison (url string) string{
+type Cripto struct{
+	Numero_casas int32
+	Token string
+	Cifrado string
+	Decifrado string
+	Resumo_criptografico string
+}
+
+func teste(url string) Cripto{
 
 	resp, err := http.Get(url) //Retorna um ponteiro para um valor do tipo "Response"
 	
@@ -27,46 +38,34 @@ func jaison (url string) string{
 		log.Fatal(resp.StatusCode)	
 	}
 
-	// Por fim escreve o conteúdo do feed de rss
-	bodyBytes, err2 := ioutil.ReadAll(resp.Body) 
-	
+	response, err2 := ioutil.ReadAll(resp.Body)
+
 	if err2 != nil{
 		log.Fatal(err2)
 	}
 	
-	bodyString := string(bodyBytes) 
-	
-	escreve_json(bodyString)
+	var dadosJson Cripto
 
-	return bodyString
-}
+	err3 := json.Unmarshal(response, &dadosJson)
 
-func escreve_json(json string) {
-
-	mydata := []byte(json) // Texto em formato para ser escrito
-
-	// the WriteFile method returns an error if unsuccessful - Retirado do site https://tutorialedge.net/golang/reading-writing-files-in-go/
-	err := ioutil.WriteFile("answer.json", mydata, 0777)
-	// handle this error
-	if err != nil {
-		// print it out
-		fmt.Println(err)
+	if err3 != nil{
+		log.Fatal(err3)
 	}
+
+	return dadosJson
 }
 
-func encode_json(texto string, numero int32){
+func encode_json(texto string, numero int32) string{
 
 	saida := bytes.Buffer{}
 	texto = strings.ToLower(texto)
 
 	for i := range texto{
-		if(texto[i] > 97 && texto[i] < 122){
+		if(texto[i] >= 97 && texto[i] <= 122){
 			novo := int32(texto[i]) + numero
 			if(novo > 122){
 				aux := novo - 122
-				print(aux)
-				novo = 97 + aux - 1
-				print(string(novo))
+				novo = 96 + aux
 			}
 			final := string(novo)
 			saida.WriteString(final)
@@ -76,13 +75,52 @@ func encode_json(texto string, numero int32){
 		}
 	}
 	print(saida.String())
+	return saida.String()
+}
+
+func decode_json(texto string, numero int32) string{
+
+	saida := bytes.Buffer{}
+	texto = strings.ToLower(texto)
+
+	for i := range texto{
+		if(texto[i] >= 97 && texto[i] <= 122){
+			novo := int32(texto[i]) - numero
+			if(novo < 97){
+				aux := 97 - novo
+				novo = 123 - aux
+			}
+			final := string(novo)
+			saida.WriteString(final)
+		}else{
+			novo := int32(texto[i])
+			saida.WriteString(string(novo))
+		}
+	}
+	return saida.String()
+}
+
+func write_json(final Cripto){
+
+	file, _ := json.MarshalIndent(final, "", " ")
+ 
+	_ = ioutil.WriteFile("answer.json", file, 0644)
+}
+
+func resume_sha1(texto string) string{
+
+    h := sha1.New()
+    h.Write([]byte(texto))
+    resume := hex.EncodeToString(h.Sum(nil))
+	
+	return resume
 }
 
 func main() {
 
-	//api := "https://api.codenation.dev/v1/challenge/dev-ps/generate-data?token=2ba5541ee2a9cac769de829db6ca75e9c1facf08"
-	//json := jaison(api)
-	//fmt.Print(json)
-	
-	encode_json("az &**bc", 10)
+	api := "https://api.codenation.dev/v1/challenge/dev-ps/generate-data?token=2ba5541ee2a9cac769de829db6ca75e9c1facf08"
+	final := teste(api)
+	final.Decifrado = decode_json(final.Cifrado, final.Numero_casas)
+	final.Resumo_criptografico = resume_sha1(final.Decifrado)
+	write_json(final)
 }
