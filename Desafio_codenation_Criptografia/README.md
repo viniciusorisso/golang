@@ -9,8 +9,3 @@ Cifrado: d oljhlud udsrvd pduurp vdowrx vreuh r fdfkruur fdqvdgr
 Regras
 
     As mensagens serão convertidas para minúsculas tanto para a criptografia quanto para descriptografia.
-    No nosso caso os números e pontos serão mantidos, ou seja:
-
-Normal: 1a.a
-
-Cifrado: 1d.d
