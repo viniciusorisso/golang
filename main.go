@@ -22,7 +22,7 @@ type Cripto struct{
 	Resumo_criptografico string
 }
 
-func teste(url string) Cripto{
+func get_json(url string) Cripto{
 
 	resp, err := http.Get(url) //Retorna um ponteiro para um valor do tipo "Response"
 	
@@ -118,10 +118,10 @@ func resume_sha1(texto string) string{
 
 func main() {
 
-	api := "https://api.codenation.dev/v1/challenge/dev-ps/generate-data?token='COLOCAR O TOKEN AQUI'"
-	final := teste(api)
+	api := "https://api.codenation.dev/v1/challenge/dev-ps/generate-data?token='SEU TOKEN AQUI'"
+	final := get_json(api)
 	final.Decifrado = decode_json(final.Cifrado, final.Numero_casas)
 	final.Resumo_criptografico = resume_sha1(final.Decifrado)
 	write_json(final)
-
+	
 }
