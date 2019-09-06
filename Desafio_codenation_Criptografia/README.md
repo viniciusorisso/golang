@@ -5,7 +5,7 @@
 
 # Resumo
 
-Criar um algorítmo que faz um request de um arquivo json usando uma API recebendo:
+Criar um algorítmo que faz um request HTTP, recebe um arquivo json usando uma API:
     
     {
         "numero_casas": 10,
